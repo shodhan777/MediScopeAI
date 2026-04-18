@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import joblib
 import numpy as np
+import pandas as pd
 
 app = Flask(__name__)
 CORS(app)
@@ -86,7 +87,11 @@ def home():
 def predict_heart():
     data = request.json
 
-    features = np.array([data[f] for f in heart_features]).reshape(1, -1)
+    features = pd.DataFrame(
+    [[data[f] for f in heart_features]],
+    columns=heart_features
+)
+
     features = heart_scaler.transform(features)
 
     pred = heart_model.predict(features)[0]
@@ -106,8 +111,10 @@ def predict_heart():
 def predict_diabetes():
     data = request.json
 
-    features = np.array([data[f] for f in diabetes_features]).reshape(1, -1)
-    features = diabetes_scaler.transform(features)
+    features = pd.DataFrame(
+    [[data[f] for f in heart_features]],
+    columns=heart_features
+)
 
     pred = diabetes_model.predict(features)[0]
     prob = diabetes_model.predict_proba(features)[0][1]
@@ -128,8 +135,10 @@ def predict_stroke():
 
     encoded = encode_stroke_input(data)
 
-    features = np.array([encoded.get(f, 0) for f in stroke_features]).reshape(1, -1)
-    features = stroke_scaler.transform(features)
+    features = pd.DataFrame(
+    [[data[f] for f in heart_features]],
+    columns=heart_features
+)
 
     pred = stroke_model.predict(features)[0]
     prob = stroke_model.predict_proba(features)[0][1]

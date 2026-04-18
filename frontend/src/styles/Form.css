@@ -1,0 +1,147 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #eef5fb;
+}
+
+/* NAVBAR */
+
+.navbar {
+  background: #114b7a;
+  color: white;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.nav-links {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+/* PAGE */
+
+.page {
+  padding: 30px 15px;
+}
+
+.form-card {
+  max-width: 750px;
+  margin: auto;
+  background: white;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+h1 {
+  color: #114b7a;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+/* FORM */
+
+.smart-form {
+  display: grid;
+  gap: 14px;
+}
+
+label {
+  font-weight: 600;
+}
+
+input,
+select {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background: #114b7a;
+  color: white;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+button:hover {
+  background: #0d3c62;
+}
+
+button:disabled {
+  background: gray;
+}
+
+.secondary-btn {
+  background: #5d89aa;
+}
+
+/* RESULT CARD */
+
+.risk-card {
+  margin-top: 25px;
+  background: #f8fbff;
+  padding: 22px;
+  border-radius: 14px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 30px;
+  color: white;
+  margin: 10px 0;
+}
+
+.red { background: #d9534f; }
+.orange { background: #f0ad4e; }
+.green { background: #5cb85c; }
+
+.progress {
+  width: 100%;
+  height: 14px;
+  background: #ddd;
+  border-radius: 30px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.progress-fill {
+  height: 100%;
+}
+
+/* DASHBOARD */
+
+.dashboard-grid {
+  margin-top: 25px;
+  display: grid;
+  gap: 18px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .form-card {
+    padding: 18px;
+  }
+}
