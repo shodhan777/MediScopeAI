@@ -203,3 +203,92 @@ By combining predictive accuracy, interpretability, and robust evaluation, MediS
 
 ---
 
+
+
+
+- Real-Time Decision Support  
+- Explainable AI (XAI)  
+- Unified Health Screening Dashboard  
+
+It is built using a scalable modular architecture:
+
+- **Frontend:** React.js  
+- **Backend:** Node.js + Express.js  
+- **ML API:** Flask  
+- **Models:** Scikit-learn, XGBoost  
+
+:contentReference[oaicite:0]{index=0}
+
+---
+
+# 🎯 Objectives
+
+- Predict multiple chronic diseases using AI  
+- Provide confidence-based health screening  
+- Support early diagnosis and preventive care  
+- Offer real-time clinical recommendations  
+- Improve trust with Explainable AI  
+- Build a deployable healthcare SaaS platform  
+
+---
+
+# ✅ Current Features
+
+## 🩺 Disease Prediction Modules
+
+- ❤️ Heart Disease Prediction  
+- 🩸 Diabetes Prediction  
+- 🧠 Stroke Prediction  
+- 🔥 Unified Predict All Screening  
+
+---
+
+## 🤖 Machine Learning Pipeline
+
+Implemented and compared:
+
+- Logistic Regression  
+- Random Forest  
+- XGBoost  
+
+Includes:
+
+- Automatic Best Model Selection  
+- Precision / Recall / F1 Comparison  
+- Imbalanced Dataset Handling  
+- Model Serialization using Joblib  
+
+---
+
+## 📊 Smart Risk Engine
+
+### Risk Score (0–100%)
+
+Classifies patients into:
+
+- 🟢 Low Risk  
+- 🟡 Medium Risk  
+- 🔴 High Risk  
+
+### Confidence Score
+
+Prediction certainty shown as:
+
+- Low Confidence  
+- Medium Confidence  
+- High Confidence  
+
+---
+
+## 💻 Professional Frontend Dashboard
+
+- Responsive React UI  
+- Medical-Themed Forms  
+- Essential + Advanced Fields  
+- Predict All Dashboard  
+- Color-Coded Result Cards  
+- Animated Progress Bars  
+- Navbar + Routing  
+- Mobile Friendly Design  
+
+---

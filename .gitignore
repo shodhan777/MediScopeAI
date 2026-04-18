@@ -1,0 +1,95 @@
+# =========================
+# Node.js
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# =========================
+# React / Vite
+# =========================
+dist/
+build/
+.vite/
+coverage/
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+env/
+
+# =========================
+# Flask
+# =========================
+instance/
+.webassets-cache/
+
+# =========================
+# ML Models / Data
+# =========================
+*.pkl
+*.joblib
+*.h5
+*.model
+*.csv
+*.xlsx
+*.zip
+
+# Keep folders tracked
+!ml_service/data/.gitkeep
+!ml_service/models/.gitkeep
+
+# =========================
+# Environment Files
+# =========================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# Temporary Files
+# =========================
+tmp/
+temp/
+*.tmp
+
+# =========================
+# Deployment
+# =========================
+.vercel/
+.render/
