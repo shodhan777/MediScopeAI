@@ -1,9 +1,12 @@
 import { useState } from "react";
 import API from "../services/api";
 import RiskCard from "../components/RiskCard";
+import HeartXAI from "../components/HeartXAI";
+import HeartSimulator from "../components/HeartSimulator";
 import "../styles/Form.css";
 
 function HeartForm() {
+  const [submittedData, setSubmittedData] = useState(null);
   const [form, setForm] = useState({
     age: "",
     sex: 1,
@@ -79,6 +82,7 @@ function HeartForm() {
 
       const res = await API.post("/predict/heart", finalData);
 
+      setSubmittedData(finalData);
       setResult({
         ...res.data,
         confidence
@@ -240,6 +244,9 @@ function HeartForm() {
                 <strong>Prediction Confidence:</strong> {result.confidence}
               </p>
             </div>
+
+            <HeartXAI result={result} />
+            <HeartSimulator result={result} initialData={submittedData} />
           </>
         )}
       </div>
