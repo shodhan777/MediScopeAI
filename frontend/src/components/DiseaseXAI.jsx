@@ -1,7 +1,7 @@
 import React from "react";
 import "../styles/AdvancedFeatures.css";
 
-function HeartXAI({ result }) {
+function DiseaseXAI({ result }) {
   if (!result || (!result.smart_alert && !result.xai_insights && !result.recommendations)) {
     return null;
   }
@@ -72,4 +72,4 @@ function HeartXAI({ result }) {
   );
 }
 
-export default HeartXAI;
+export default DiseaseXAI;

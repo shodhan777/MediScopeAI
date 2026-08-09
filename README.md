@@ -45,30 +45,40 @@ MediScope AI is a comprehensive healthcare intelligence platform designed to pre
 
 ---
 
-## 🩺 Phase 1 & 2: Machine Learning Pipeline & Disease Prediction Modules
-- ❤️ **Heart Disease Prediction** (Trained using Best Model selection)
-- 🩸 **Diabetes Prediction**
-- 🧠 **Stroke Prediction** (Imbalance handling via XGBoost/Random Forest/Logistic Regression)
-- 🔥 **Unified Predict All Screening**
-- Automatic model selection prioritizing Recall & F1-score for clinical reliability.
+## ✅ Phase 1 & 2: Machine Learning Pipeline & Disease Prediction Modules
+- ❤️ **Heart Disease**: Clinical classification using age, cholesterol, resting BP, etc.
+- **Diabetes Assessment**: Early detection based on insulin, BMI, glucose, and pedigree functions.
+- **Stroke Prediction (Phase 5)**: Advanced categorical encoding & XGBoost baseline.
+- **Multi-Task Learning (Phase 7 - Research Grade)**: Deep learning PyTorch architecture predicting all 3 diseases simultaneously through a shared representation layer.
+- **Trustworthy AI Layer (Phase 7)**:
+  - **Explainability (SHAP)**: Identifies top feature drivers dynamically per patient.
+  - **Uncertainty Estimation**: Uses MC Dropout to quantify model confidence.
+  - **Calibration**: Temperature scaling applied to model logits.
+  - **Selective Abstention**: Automated human-in-the-loop fallback when confidence is low.
+
+## Tech Stack
+- **Frontend**: React.js + Vite (Dynamic Research Dashboard)
+- **Backend API Gateway**: Node.js + Express
+- **Machine Learning API**: Python + Flask
+- **ML/DL Models**: PyTorch (MTL), Scikit-Learn, XGBoost, SHAP
 
 ---
 
-## 🔷 Phase 3: Node.js Backend & Middleware Architecture
+## ✅ Phase 3: Node.js Backend & Middleware Architecture
 - Robust Express.js backend decoupling frontend from Flask ML inference services.
 - Automated input validation and centralized API routing (`/api/predict/heart`, `/api/predict/all`).
 - Modular logging, error handling, and secure cross-origin resource sharing (CORS).
 
 ---
 
-## 🎨 Phase 4: Professional Frontend React.js Dashboard
+## ✅ Phase 4: Professional Frontend React.js Dashboard
 - Modern, visually immersive medical UI styled with clean card glassmorphism and tailored color palettes.
 - Dedicated screening forms with progressive disclosure (Essential vs. Advanced cardiology inputs).
 - Dynamic progress gauges and color-coded risk stratification badges (Low / Medium / High).
 
 ---
 
-## 🔥 Phase 5: Advanced Features & Core Innovation (❤️ Heart Disease Module)
+## ✅ Phase 5: Advanced Features & Core Innovation (❤️ Heart Disease Module)
 
 ### 🔹 Real-Time Risk Evolution Engine (Interactive Sandbox)
 - **Live What-If Simulation:** Features tactile range sliders for resting blood pressure, serum cholesterol, and maximum heart rate on exertion.
@@ -85,7 +95,7 @@ MediScope AI is a comprehensive healthcare intelligence platform designed to pre
 
 ---
 
-## 🧠 Phase 6: Explainable AI (XAI) & Clinical Decision Support (❤️ Heart Disease Module)
+## ✅ Phase 6: Explainable AI (XAI) & Clinical Decision Support (❤️ Heart Disease Module)
 
 ### 🔹 Transparent Prediction Interpretability (XAI)
 - Eliminates AI black-box mystery by revealing the underlying physiological factors driving prediction results.

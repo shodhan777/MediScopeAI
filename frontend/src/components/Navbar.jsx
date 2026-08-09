@@ -7,10 +7,11 @@ function Navbar() {
 
       <div className="nav-links">
         <Link to="/">Home</Link>
-        <Link to="/heart">Heart</Link>
+        <Link to="/heart">Heart Disease</Link>
         <Link to="/diabetes">Diabetes</Link>
         <Link to="/stroke">Stroke</Link>
         <Link to="/predict-all">Predict All</Link>
+        <Link to="/research" style={{color: '#8b5cf6', fontWeight: 'bold'}}>Research MTL</Link>
       </div>
     </nav>
   );

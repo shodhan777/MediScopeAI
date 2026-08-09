@@ -7,6 +7,7 @@ import HeartForm from "./pages/HeartForm";
 import DiabetesForm from "./pages/DiabetesForm";
 import StrokeForm from "./pages/StrokeForm";
 import PredictAll from "./pages/PredictAll";
+import ResearchDashboard from "./pages/ResearchDashboard";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/diabetes" element={<DiabetesForm />} />
         <Route path="/stroke" element={<StrokeForm />} />
         <Route path="/predict-all" element={<PredictAll />} />
+        <Route path="/research" element={<ResearchDashboard />} />
       </Routes>
     </BrowserRouter>
   );

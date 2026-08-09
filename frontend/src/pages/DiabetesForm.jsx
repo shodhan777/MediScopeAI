@@ -1,6 +1,7 @@
 import { useState } from "react";
 import API from "../services/api";
 import RiskCard from "../components/RiskCard";
+import DiseaseXAI from "../components/DiseaseXAI";
 import "../styles/Form.css";
 
 function DiabetesForm() {
@@ -18,6 +19,7 @@ function DiabetesForm() {
   const [result, setResult] = useState(null);
   const [showMore, setShowMore] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const change = (e) => {
     setForm({
@@ -29,6 +31,7 @@ function DiabetesForm() {
   const submit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMsg("");
 
     try {
       const finalData = {
@@ -42,24 +45,15 @@ function DiabetesForm() {
         Age: Number(form.Age || 40)
       };
 
-      let confidence = "Medium";
-      let optionalFilled = 0;
-
-      ["Pregnancies", "SkinThickness", "Insulin", "DiabetesPedigreeFunction"].forEach((f) => {
-        if (form[f] !== "") optionalFilled++;
-      });
-
-      if (optionalFilled >= 3) confidence = "High";
-      else if (optionalFilled <= 1) confidence = "Low";
-
       const res = await API.post("/predict/diabetes", finalData);
-
-      setResult({
-        ...res.data,
-        confidence
-      });
+      setResult(res.data);
     } catch (error) {
-      alert("Prediction failed");
+      console.error(error);
+      if (error.response && error.response.status === 422) {
+        setErrorMsg("Please enter valid input data.");
+      } else {
+        setErrorMsg("Prediction service is temporarily unavailable. Please try again.");
+      }
     }
 
     setLoading(false);
@@ -113,16 +107,23 @@ function DiabetesForm() {
           )}
 
           <button type="submit" disabled={loading}>
-            {loading ? "Predicting..." : "Predict Risk"}
+            {loading ? "Analyzing patient data..." : "Predict Risk"}
           </button>
         </form>
 
-        {result && (
+        {errorMsg && (
+          <div className="error-message">
+            {errorMsg}
+          </div>
+        )}
+
+        {result && !loading && !errorMsg && (
           <>
             <RiskCard result={result} />
             <div className="confidence-box">
-              <p><strong>Prediction Confidence:</strong> {result.confidence}</p>
+              <p><strong>Statistical Model Confidence:</strong> {result.confidence}</p>
             </div>
+            <DiseaseXAI result={result} />
           </>
         )}
       </div>

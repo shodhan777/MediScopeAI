@@ -58,3 +58,21 @@ exports.predictAll = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.predictResearchAll = async (req, res, next) => {
+  try {
+    const response = await axios.post(`${ML_API}/predict/research/all`, req.body);
+    res.json(response.data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getResearchMetrics = async (req, res, next) => {
+  try {
+    const response = await axios.get(`${ML_API}/research/metrics`);
+    res.json(response.data);
+  } catch (error) {
+    next(error);
+  }
+};

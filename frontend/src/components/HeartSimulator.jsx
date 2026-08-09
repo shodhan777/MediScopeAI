@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import API from "../services/api";
 import "../styles/AdvancedFeatures.css";
 
@@ -31,27 +31,33 @@ function HeartSimulator({ result, initialData }) {
     });
   }, [result, initialData]);
 
-  const handleSliderChange = async (e) => {
+  const timeoutRef = useRef(null);
+
+  const handleSliderChange = (e) => {
     const { name, value } = e.target;
     const numVal = Number(value);
     const updatedData = { ...simData, [name]: numVal };
     setSimData(updatedData);
 
-    try {
-      setLoadingSim(true);
-      const payload = { ...initialData, ...updatedData };
-      const res = await API.post("/predict/heart", payload);
-      if (res.data) {
-        setLiveResult({
-          risk_score: res.data.risk_score,
-          risk_level: res.data.risk_level
-        });
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    
+    timeoutRef.current = setTimeout(async () => {
+      try {
+        setLoadingSim(true);
+        const payload = { ...initialData, ...updatedData };
+        const res = await API.post("/predict/heart", payload);
+        if (res.data) {
+          setLiveResult({
+            risk_score: res.data.risk_score,
+            risk_level: res.data.risk_level
+          });
+        }
+      } catch (err) {
+        console.error("Live simulation error:", err);
+      } finally {
+        setLoadingSim(false);
       }
-    } catch (err) {
-      console.error("Live simulation error:", err);
-    } finally {
-      setLoadingSim(false);
-    }
+    }, 500);
   };
 
   const getColor = (level) => {

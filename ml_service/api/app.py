@@ -1,8 +1,27 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import joblib
 import numpy as np
 import pandas as pd
+import torch
+import json
+import os
+import sys
+
+# Allow importing from parent directory for MTL modules
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from preprocessing.mtl_adapter import map_heart_data, map_diabetes_data, map_stroke_data
+from inference.mtl_model import get_mtl_model
+from explainability.explainer import MTLExplainer
+from explainability.baseline_explainer import (
+    generate_logistic_insights,
+    generate_tree_insights,
+    generate_cds_recommendations,
+    calculate_statistical_confidence
+)
+from uncertainty.estimator import get_mc_dropout_uncertainty, calculate_confidence
+from calibration.calibrator import calibrate_prediction
+from inference.selective_predictor import apply_selective_prediction
 
 app = Flask(__name__)
 CORS(app)
@@ -49,58 +68,8 @@ def get_risk_level(prob):
         return "High"
 
 # =========================
-# HEART XAI & SIMULATION HELPERS (PHASE 5 & 6)
+# (Phase 5/6 Heart Insights removed in favor of baseline_explainer)
 # =========================
-def generate_heart_insights(data, prob):
-    alert = ""
-    trestbps = float(data.get("trestbps", 120))
-    chol = float(data.get("chol", 200))
-    age = float(data.get("age", 50))
-    cp = int(data.get("cp", 0))
-    thalach = float(data.get("thalach", 150))
-
-    if prob >= 0.65 or trestbps >= 170 or chol >= 300:
-        alert = "🚨 CRITICAL CLINICAL ALERT: High cardiovascular risk detected with significant metabolic or arterial pressure elevation. Urgent clinical consultation and ECG diagnostic evaluation are strongly recommended."
-    elif prob >= 0.35 or trestbps >= 140 or chol >= 240:
-        alert = "⚠️ PREVENTIVE WARNING: Moderate cardiovascular risk profile observed. Advised to schedule routine medical screening, monitor lipid profile, and adopt targeted diet and exercise interventions."
-    else:
-        alert = "🟢 FAVORABLE CARDIOVASCULAR PROFILE: Evaluated biometric parameters remain stable within low-risk thresholds. Continue maintaining healthy diet, hydration, and regular aerobic activity."
-
-    xai = []
-
-    if trestbps >= 140:
-        xai.append({"factor": "Resting Blood Pressure", "value": f"{trestbps} mmHg", "status": "Hypertensive Stage", "impact": "High", "description": "Elevated systolic pressure puts severe structural strain on arterial walls and increases myocardial cardiac workload."})
-    elif trestbps >= 120:
-        xai.append({"factor": "Resting Blood Pressure", "value": f"{trestbps} mmHg", "status": "Pre-hypertensive", "impact": "Medium", "description": "Slightly elevated arterial pressure requiring preventive nutritional and fitness intervention."})
-
-    if chol >= 240:
-        xai.append({"factor": "Serum Cholesterol", "value": f"{chol} mg/dl", "status": "High (Hypercholesterolemia)", "impact": "High", "description": "Elevated serum lipid concentration accelerates atherosclerotic coronary plaque progression."})
-    elif chol >= 200:
-        xai.append({"factor": "Serum Cholesterol", "value": f"{chol} mg/dl", "status": "Borderline High", "impact": "Medium", "description": "Moderate lipid levels contributing to cumulative arterial plaque formation."})
-
-    if cp in [0, 1, 2]:
-        cp_map = {0: "Typical Angina", 1: "Atypical Angina", 2: "Non-anginal Pain"}
-        xai.append({"factor": "Chest Pain Symptoms", "value": cp_map.get(cp, "Reported Pain"), "status": "Symptomatic", "impact": "High", "description": "Reported chest discomfort suggests possible transient myocardial oxygen demand mismatch."})
-
-    if age >= 60:
-        xai.append({"factor": "Demographic Age", "value": f"{age} years", "status": "Significant Factor", "impact": "Medium", "description": "Age-related physiological reduction in vascular compliance and elasticity."})
-    elif age >= 45:
-        xai.append({"factor": "Demographic Age", "value": f"{age} years", "status": "Moderate Factor", "impact": "Low", "description": "Entering demographic baseline where coronary disease incidence gradually climbs."})
-
-    if thalach <= 110:
-        xai.append({"factor": "Max Heart Rate", "value": f"{thalach} bpm", "status": "Suboptimal Reserve", "impact": "Medium", "description": "Reduced maximal cardiac output and chronotropic response during physical strain."})
-
-    if not xai:
-        xai.append({"factor": "Biometric & Vital Profile", "value": "Within Reference Limits", "status": "Optimal", "impact": "Low", "description": "Primary clinical diagnostic inputs correspond with standard cardiac equilibrium."})
-
-    recommendations = [
-        "Conduct consistent blood pressure monitoring (target resting systolic level < 120 mmHg).",
-        "Incorporate a Mediterranean dietary structure emphasizes dietary fiber, healthy omega fatty acids, and low sodium (< 2g/day).",
-        "Perform a minimum of 150 minutes per week of sustained moderate aerobic physical training.",
-        "Consult a practicing physician or cardiologist before modifying existing medication, supplements, or clinical regimens."
-    ]
-
-    return alert, xai, recommendations
 
 def calculate_heart_prob_for(data_dict):
     features = pd.DataFrame(
@@ -156,7 +125,10 @@ def predict_heart():
     prob = calculate_heart_prob_for(data)
     pred = 1 if prob >= 0.5 else 0
 
-    alert, xai, recommendations = generate_heart_insights(data, prob)
+    features_df = pd.DataFrame([[float(data.get(f, 0)) for f in heart_features]], columns=heart_features)
+    xai = generate_logistic_insights(heart_model, heart_scaler, features_df, data, heart_features)
+    alert, recommendations = generate_cds_recommendations("heart", data, prob)
+    confidence = calculate_statistical_confidence(prob)
 
     # Core Innovation: Clinical Scenario Simulations
     untreated_data = dict(data)
@@ -188,6 +160,7 @@ def predict_heart():
         "prediction": int(pred),
         "risk_score": round(float(prob), 2),
         "risk_level": get_risk_level(prob),
+        "confidence": confidence,
         "smart_alert": alert,
         "xai_insights": xai,
         "recommendations": recommendations,
@@ -209,11 +182,19 @@ def predict_diabetes():
     prob = diabetes_model.predict_proba(features_scaled)[0][1]
     pred = 1 if prob >= 0.5 else 0
 
+    xai = generate_tree_insights(diabetes_model, diabetes_scaler, features, data, diabetes_features)
+    alert, recommendations = generate_cds_recommendations("diabetes", data, prob)
+    confidence = calculate_statistical_confidence(prob)
+
     return jsonify({
         "disease": "diabetes",
         "prediction": int(pred),
         "risk_score": round(float(prob), 2),
-        "risk_level": get_risk_level(prob)
+        "risk_level": get_risk_level(prob),
+        "confidence": confidence,
+        "smart_alert": alert,
+        "xai_insights": xai,
+        "recommendations": recommendations
     })
 
 # =========================
@@ -233,11 +214,19 @@ def predict_stroke():
     prob = stroke_model.predict_proba(features_scaled)[0][1]
     pred = 1 if prob >= 0.5 else 0
 
+    xai = generate_logistic_insights(stroke_model, stroke_scaler, features, encoded, stroke_features)
+    alert, recommendations = generate_cds_recommendations("stroke", data, prob)
+    confidence = calculate_statistical_confidence(prob)
+
     return jsonify({
         "disease": "stroke",
         "prediction": int(pred),
         "risk_score": round(float(prob), 2),
-        "risk_level": get_risk_level(prob)
+        "risk_level": get_risk_level(prob),
+        "confidence": confidence,
+        "smart_alert": alert,
+        "xai_insights": xai,
+        "recommendations": recommendations
     })
 
 # =========================
@@ -266,16 +255,116 @@ def predict_all():
     return jsonify({
         "heart": {
             "risk_score": round(float(h_prob), 2),
-            "risk_level": get_risk_level(h_prob)
+            "risk_level": get_risk_level(h_prob),
+            "confidence": calculate_statistical_confidence(h_prob)
         },
         "diabetes": {
             "risk_score": round(float(d_prob), 2),
-            "risk_level": get_risk_level(d_prob)
+            "risk_level": get_risk_level(d_prob),
+            "confidence": calculate_statistical_confidence(d_prob)
         },
         "stroke": {
             "risk_score": round(float(s_prob), 2),
-            "risk_level": get_risk_level(s_prob)
+            "risk_level": get_risk_level(s_prob),
+            "confidence": calculate_statistical_confidence(s_prob)
         }
+    })
+
+# =========================
+# RESEARCH (MTL & TRUSTWORTHY AI)
+# =========================
+
+mtl_scaler = None
+mtl_model = None
+explainer = None
+
+def init_research_models():
+    global mtl_scaler, mtl_model, explainer
+    if mtl_model is None:
+        try:
+            mtl_scaler = joblib.load("../models/multitask/mtl_scaler.pkl")
+            mtl_model = get_mtl_model(27)
+            mtl_model.load_state_dict(torch.load("../models/multitask/mtl_model.pth"))
+            mtl_model.eval()
+            explainer = MTLExplainer(model_path="../models/multitask/mtl_model.pth")
+        except Exception as e:
+            print(f"Research models not initialized: {e}")
+
+@app.route("/research/metrics", methods=["GET"])
+def get_research_metrics():
+    try:
+        with open("../models/multitask/metrics_report.json", "r") as f:
+            metrics = json.load(f)
+        return jsonify(metrics)
+    except Exception as e:
+        return jsonify({"error": "Metrics not found", "details": str(e)}), 404
+
+@app.route("/predict/research/all", methods=["POST"])
+def predict_research_all():
+    init_research_models()
+    if mtl_model is None:
+        return jsonify({"error": "MTL model not available"}), 503
+        
+    data = request.json
+    
+    # 1. Preprocessing Adapter
+    h_df = pd.DataFrame([data.get("heart", {})])
+    d_df = pd.DataFrame([data.get("diabetes", {})])
+    s_df = pd.DataFrame([data.get("stroke", {})])
+    
+    h_x, _ = map_heart_data(h_df)
+    d_x, _ = map_diabetes_data(d_df)
+    s_encoded = encode_stroke_input(data.get("stroke", {}))
+    s_x, _ = map_stroke_data(s_encoded)
+    
+    # Combine (for a joint prediction, we assume the patient has all these features,
+    # so we merge the vectors into one patient profile).
+    combined_x = h_x.copy()
+    for col in d_x.columns:
+        if d_x[col].iloc[0] != 0: combined_x[col] = d_x[col]
+    for col in s_x.columns:
+        if s_x[col].iloc[0] != 0: combined_x[col] = s_x[col]
+        
+    x_scaled = mtl_scaler.transform(combined_x)
+    x_tensor = torch.FloatTensor(x_scaled)
+    
+    # 2. Prediction
+    with torch.no_grad():
+        preds = mtl_model(x_tensor)
+        h_prob_raw = preds[0].item()
+        d_prob_raw = preds[1].item()
+        s_prob_raw = preds[2].item()
+        
+    # 3. Calibration
+    h_prob = calibrate_prediction(h_prob_raw)
+    d_prob = calibrate_prediction(d_prob_raw)
+    s_prob = calibrate_prediction(s_prob_raw)
+    
+    # 4. Uncertainty Estimation (MC Dropout)
+    uncertainty = get_mc_dropout_uncertainty(mtl_model, x_tensor, n_iterations=20)
+    
+    # 5. Explainability (SHAP)
+    # Using background of zeroes for quick SHAP baseline in prototype
+    h_factors = explainer.explain(x_tensor, 'heart')
+    d_factors = explainer.explain(x_tensor, 'diabetes')
+    s_factors = explainer.explain(x_tensor, 'stroke')
+    
+    def process_disease(disease_name, prob, uncert, factors):
+        conf_level = calculate_confidence(uncert['std'])
+        selective = apply_selective_prediction(prob, conf_level)
+        return {
+            "risk_score": round(prob, 2),
+            "confidence": conf_level,
+            "uncertainty_std": round(uncert['std'], 3),
+            "abstained": selective['abstained'],
+            "status_message": selective['message'],
+            "top_factors": factors
+        }
+        
+    return jsonify({
+        "heart": process_disease("heart", h_prob, uncertainty['heart'], h_factors),
+        "diabetes": process_disease("diabetes", d_prob, uncertainty['diabetes'], d_factors),
+        "stroke": process_disease("stroke", s_prob, uncertainty['stroke'], s_factors)
     })
 
 # =========================

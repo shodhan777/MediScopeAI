@@ -1,7 +1,7 @@
 import { useState } from "react";
 import API from "../services/api";
 import RiskCard from "../components/RiskCard";
-import HeartXAI from "../components/HeartXAI";
+import DiseaseXAI from "../components/DiseaseXAI";
 import HeartSimulator from "../components/HeartSimulator";
 import "../styles/Form.css";
 
@@ -26,6 +26,7 @@ function HeartForm() {
   const [result, setResult] = useState(null);
   const [showMore, setShowMore] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const change = (e) => {
     setForm({
@@ -38,6 +39,7 @@ function HeartForm() {
     e.preventDefault();
 
     setLoading(true);
+    setErrorMsg("");
 
     try {
       const finalData = {
@@ -56,40 +58,16 @@ function HeartForm() {
         thal: Number(form.thal || 2)
       };
 
-      let confidence = "Medium";
-
-      let optionalFilled = 0;
-
-      const optionalFields = [
-        "fbs",
-        "restecg",
-        "thalach",
-        "exang",
-        "oldpeak",
-        "slope",
-        "ca",
-        "thal"
-      ];
-
-      optionalFields.forEach((field) => {
-        if (form[field] !== "" && form[field] !== null) {
-          optionalFilled++;
-        }
-      });
-
-      if (optionalFilled >= 7) confidence = "High";
-      else if (optionalFilled <= 2) confidence = "Low";
-
       const res = await API.post("/predict/heart", finalData);
-
       setSubmittedData(finalData);
-      setResult({
-        ...res.data,
-        confidence
-      });
+      setResult(res.data);
     } catch (error) {
-      alert("Prediction failed. Please try again.");
-      console.log(error);
+      console.error(error);
+      if (error.response && error.response.status === 422) {
+        setErrorMsg("Please enter valid input data.");
+      } else {
+        setErrorMsg("Prediction service is temporarily unavailable. Please try again.");
+      }
     }
 
     setLoading(false);
@@ -231,21 +209,25 @@ function HeartForm() {
           )}
 
           <button type="submit" disabled={loading}>
-            {loading ? "Predicting..." : "Predict Risk"}
+            {loading ? "Analyzing patient data..." : "Predict Risk"}
           </button>
         </form>
 
-        {result && (
+        {errorMsg && (
+          <div className="error-message">
+            {errorMsg}
+          </div>
+        )}
+
+        {result && !loading && !errorMsg && (
           <>
             <RiskCard result={result} />
-
             <div className="confidence-box">
-              <p>
-                <strong>Prediction Confidence:</strong> {result.confidence}
-              </p>
+              <p><strong>Statistical Model Confidence:</strong> {result.confidence}</p>
             </div>
-
-            <HeartXAI result={result} />
+            
+            <DiseaseXAI result={result} />
+            
             <HeartSimulator result={result} initialData={submittedData} />
           </>
         )}

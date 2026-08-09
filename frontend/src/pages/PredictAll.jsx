@@ -16,6 +16,7 @@ function PredictAll() {
   const [showMore, setShowMore] = useState(false);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const change = (e) => {
     setForm({
@@ -27,6 +28,7 @@ function PredictAll() {
   const submit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMsg("");
 
     try {
       const payload = {
@@ -74,24 +76,14 @@ function PredictAll() {
       };
 
       const res = await API.post("/predict/all", payload);
-
-      let filled = 0;
-      Object.keys(form).forEach((key) => {
-        if (form[key] !== "") filled++;
-      });
-
-      let confidence = "Medium";
-
-      if (filled >= 12) confidence = "High";
-      else if (filled <= 7) confidence = "Low";
-
-      setResult({
-        ...res.data,
-        confidence
-      });
+      setResult(res.data);
     } catch (error) {
-      alert("Prediction failed. Please try again.");
-      console.log(error);
+      console.error(error);
+      if (error.response && error.response.status === 422) {
+        setErrorMsg("Please enter valid input data.");
+      } else {
+        setErrorMsg("Prediction service is temporarily unavailable. Please try again.");
+      }
     }
 
     setLoading(false);
@@ -106,6 +98,9 @@ function PredictAll() {
       </p>
       <p>
         <strong>Risk Level:</strong> {data.risk_level}
+      </p>
+      <p>
+        <strong>Model Confidence:</strong> {data.confidence}
       </p>
     </div>
   );
@@ -232,11 +227,17 @@ function PredictAll() {
           )}
 
           <button type="submit" disabled={loading}>
-            {loading ? "Running Full Analysis..." : "Run Full Screening"}
+            {loading ? "Analyzing patient data..." : "Run Full Screening"}
           </button>
         </form>
 
-        {result && (
+        {errorMsg && (
+          <div className="error-message" style={{marginTop: "20px"}}>
+            {errorMsg}
+          </div>
+        )}
+
+        {result && !loading && !errorMsg && (
           <>
             <div className="dashboard-grid">
               <ResultCard

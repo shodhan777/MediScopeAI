@@ -5,7 +5,9 @@ const {
   predictHeart,
   predictDiabetes,
   predictStroke,
-  predictAll
+  predictAll,
+  predictResearchAll,
+  getResearchMetrics
 } = require("../controllers/predictController");
 
 const {
@@ -18,5 +20,8 @@ router.post("/predict/heart", heartValidation, predictHeart);
 router.post("/predict/diabetes", diabetesValidation, predictDiabetes);
 router.post("/predict/stroke", strokeValidation, predictStroke);
 router.post("/predict/all", predictAll);
+
+router.post("/predict/research/all", predictResearchAll);
+router.get("/research/metrics", getResearchMetrics);
 
 module.exports = router;

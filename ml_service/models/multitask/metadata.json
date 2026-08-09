@@ -1,0 +1,38 @@
+{
+    "model_name": "mediscope_multitask_v1",
+    "version": "1.0",
+    "features": [
+        "age",
+        "sex_male",
+        "trestbps",
+        "chol",
+        "fbs",
+        "bmi",
+        "diabetes_pedigree",
+        "pregnancies",
+        "insulin",
+        "skin_thickness",
+        "heart_disease_hist",
+        "hypertension_hist",
+        "cp",
+        "restecg",
+        "thalach",
+        "exang",
+        "oldpeak",
+        "slope",
+        "ca",
+        "thal",
+        "ever_married_Yes",
+        "work_type_Private",
+        "work_type_Self-employed",
+        "Residence_type_Urban",
+        "smoking_status_formerly_smoked",
+        "smoking_status_never_smoked",
+        "smoking_status_smokes"
+    ],
+    "diseases": [
+        "heart",
+        "diabetes",
+        "stroke"
+    ]
+}
