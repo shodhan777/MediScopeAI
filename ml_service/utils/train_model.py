@@ -7,7 +7,16 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+from sklearn.metrics import (
+    accuracy_score,
+    average_precision_score,
+    brier_score_loss,
+    confusion_matrix,
+    f1_score,
+    precision_score,
+    recall_score,
+    roc_auc_score
+)
 
 
 def train_pipeline(df, target_col, model_prefix):
@@ -24,14 +33,22 @@ def train_pipeline(df, target_col, model_prefix):
     X_scaled = scaler.fit_transform(X)
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X_scaled, y, test_size=0.2, random_state=42
+        X_scaled, y, test_size=0.2, random_state=42, stratify=y
     )
 
-    # 🔥 Improved models for imbalance
+    positive_count = max(int((y == 1).sum()), 1)
+    negative_count = max(int((y == 0).sum()), 1)
+
     models = {
-        "logistic": LogisticRegression(max_iter=1000, class_weight='balanced'),
-        "random_forest": RandomForestClassifier(class_weight='balanced'),
-        "xgboost": XGBClassifier(scale_pos_weight=10)
+        "logistic": LogisticRegression(max_iter=1000, class_weight="balanced", random_state=42),
+        "random_forest": RandomForestClassifier(
+            class_weight="balanced", random_state=42, n_estimators=300
+        ),
+        "xgboost": XGBClassifier(
+            scale_pos_weight=negative_count / positive_count,
+            random_state=42,
+            eval_metric="logloss"
+        )
     }
 
     results = {}
@@ -42,6 +59,7 @@ def train_pipeline(df, target_col, model_prefix):
 
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
+        y_prob = model.predict_proba(X_test)[:, 1]
 
         acc = accuracy_score(y_test, y_pred)
 
@@ -49,7 +67,10 @@ def train_pipeline(df, target_col, model_prefix):
             "accuracy": acc,
             "precision": precision_score(y_test, y_pred, zero_division=0),
             "recall": recall_score(y_test, y_pred, zero_division=0),
-            "f1_score": f1_score(y_test, y_pred, zero_division=0)
+            "f1_score": f1_score(y_test, y_pred, zero_division=0),
+            "roc_auc": roc_auc_score(y_test, y_prob),
+            "pr_auc": average_precision_score(y_test, y_prob),
+            "brier_score": brier_score_loss(y_test, y_prob)
         }
 
         # 🔥 Confusion Matrix
@@ -65,7 +86,10 @@ def train_pipeline(df, target_col, model_prefix):
     joblib.dump(scaler, f"models/{model_prefix}_scaler.pkl")
 
     # Best model
-    best_model_name = max(results, key=lambda x: results[x]["recall"])
+    best_model_name = max(
+        results,
+        key=lambda x: (results[x]["recall"], results[x]["f1_score"])
+    )
     best_model = trained_models[best_model_name]
 
     joblib.dump(best_model, f"models/{model_prefix}_best.pkl")

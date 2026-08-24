@@ -62,11 +62,11 @@ def generate_cds_recommendations(disease, data_dict, prob):
         trestbps = float(data_dict.get("trestbps", 120))
         chol = float(data_dict.get("chol", 200))
         if prob >= 0.65 or trestbps >= 170 or chol >= 300:
-            alert = "🚨 CRITICAL CLINICAL ALERT: High cardiovascular risk detected. Urgent clinical consultation recommended."
+            alert = "Model-estimated elevated cardiovascular risk. Prompt clinical evaluation is recommended."
         elif prob >= 0.35 or trestbps >= 140 or chol >= 240:
-            alert = "⚠️ PREVENTIVE WARNING: Moderate cardiovascular risk profile observed. Advised to schedule routine medical screening."
+            alert = "Model-estimated moderate cardiovascular risk. Routine clinical screening is recommended."
         else:
-            alert = "🟢 FAVORABLE CARDIOVASCULAR PROFILE: Evaluated biometric parameters remain stable within low-risk thresholds."
+            alert = "Model-estimated cardiovascular risk is currently low. Clinical context should still be considered."
             
         if trestbps >= 140:
             recommendations.append("Conduct consistent blood pressure monitoring (target resting systolic level < 120 mmHg).")
@@ -78,11 +78,11 @@ def generate_cds_recommendations(disease, data_dict, prob):
         glucose = float(data_dict.get("Glucose", 100))
         bmi = float(data_dict.get("BMI", 22))
         if prob >= 0.65 or glucose >= 200:
-            alert = "🚨 CRITICAL CLINICAL ALERT: High diabetes risk detected based on metabolic parameters. Endocrine consultation recommended."
+            alert = "Model-estimated elevated diabetes risk. Further clinical evaluation is recommended."
         elif prob >= 0.35 or glucose >= 140 or bmi >= 30:
-            alert = "⚠️ PREVENTIVE WARNING: Moderate diabetes risk profile observed. Consider lifestyle and dietary interventions."
+            alert = "Model-estimated moderate diabetes risk. Lifestyle review and clinical screening are recommended."
         else:
-            alert = "🟢 FAVORABLE METABOLIC PROFILE: Blood glucose and physical parameters indicate low immediate risk."
+            alert = "Model-estimated diabetes risk is currently low. Clinical context should still be considered."
             
         if glucose >= 140:
             recommendations.append("Monitor fasting blood glucose levels and consider HbA1c testing.")
@@ -94,11 +94,11 @@ def generate_cds_recommendations(disease, data_dict, prob):
         age = float(data_dict.get("age", 40))
         bp = float(data_dict.get("avg_glucose_level", 100))
         if prob >= 0.65 or bp >= 200:
-            alert = "🚨 CRITICAL CLINICAL ALERT: Elevated stroke risk factors identified. Immediate neurological assessment is advised."
+            alert = "Model-estimated elevated stroke risk. Prompt clinical evaluation is recommended."
         elif prob >= 0.35 or bp >= 160 or age >= 65:
-            alert = "⚠️ PREVENTIVE WARNING: Moderate stroke risk profile. Monitor cardiovascular health actively."
+            alert = "Model-estimated moderate stroke risk. Active cardiovascular monitoring is recommended."
         else:
-            alert = "🟢 FAVORABLE NEUROLOGICAL PROFILE: Stroke risk factors are within optimal bounds."
+            alert = "Model-estimated stroke risk is currently low. Clinical context should still be considered."
             
         recommendations.append("Control blood pressure and monitor for signs of hypertension.")
         recommendations.append("Limit alcohol consumption and completely avoid tobacco use.")

@@ -229,6 +229,64 @@ def predict_stroke():
         "recommendations": recommendations
     })
 
+def calculate_simulation_probability(disease, data):
+    if disease == "heart":
+        return calculate_heart_prob_for(data)
+
+    if disease == "diabetes":
+        features = pd.DataFrame(
+            [[float(data.get(f, 0)) for f in diabetes_features]],
+            columns=diabetes_features
+        )
+        scaled = diabetes_scaler.transform(features)
+        return float(diabetes_model.predict_proba(scaled)[0][1])
+
+    if disease == "stroke":
+        encoded = encode_stroke_input(data)
+        features = pd.DataFrame(
+            [[float(encoded.get(f, 0)) for f in stroke_features]],
+            columns=stroke_features
+        )
+        scaled = stroke_scaler.transform(features)
+        return float(stroke_model.predict_proba(scaled)[0][1])
+
+    raise ValueError(f"Unsupported disease: {disease}")
+
+@app.route("/simulate/<disease>", methods=["POST"])
+def simulate_risk(disease):
+    payload = request.json or {}
+    baseline = payload.get("baseline", payload)
+    scenarios = payload.get("scenarios", {})
+
+    if not isinstance(baseline, dict) or not isinstance(scenarios, dict):
+        return jsonify({"error": "baseline and scenarios must be JSON objects"}), 400
+
+    try:
+        baseline_probability = calculate_simulation_probability(disease, baseline)
+        results = {
+            "baseline": {
+                "risk_score": round(baseline_probability, 4),
+                "risk_level": get_risk_level(baseline_probability),
+                "risk_change": 0
+            }
+        }
+
+        for name, changes in scenarios.items():
+            if not isinstance(changes, dict):
+                return jsonify({"error": f"Scenario '{name}' must be a JSON object"}), 400
+            scenario_data = {**baseline, **changes}
+            probability = calculate_simulation_probability(disease, scenario_data)
+            results[name] = {
+                "risk_score": round(probability, 4),
+                "risk_level": get_risk_level(probability),
+                "risk_change": round(probability - baseline_probability, 4),
+                "changes": changes
+            }
+
+        return jsonify({"disease": disease, "results": results})
+    except (KeyError, TypeError, ValueError) as error:
+        return jsonify({"error": str(error)}), 400
+
 # =========================
 # 🔥 UNIFIED API
 # =========================

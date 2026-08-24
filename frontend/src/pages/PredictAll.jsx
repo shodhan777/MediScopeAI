@@ -2,6 +2,23 @@ import { useState } from "react";
 import API from "../services/api";
 import "../styles/Form.css";
 
+const ResultCard = ({ title, icon, data }) => (
+  <div className="result-card">
+    <h2>
+      {icon} {title}
+    </h2>
+    <p>
+      <strong>Risk Score:</strong> {(data.risk_score * 100).toFixed(0)}%
+    </p>
+    <p>
+      <strong>Risk Level:</strong> {data.risk_level}
+    </p>
+    <p>
+      <strong>Model Confidence:</strong> {data.confidence}
+    </p>
+  </div>
+);
+
 function PredictAll() {
   const [form, setForm] = useState({
     age: "",
@@ -10,7 +27,7 @@ function PredictAll() {
     chol: "",
     glucose: "",
     bmi: "",
-    hypertension: "0"
+    hypertension: "0",
   });
 
   const [showMore, setShowMore] = useState(false);
@@ -21,7 +38,7 @@ function PredictAll() {
   const change = (e) => {
     setForm({
       ...form,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -45,7 +62,7 @@ function PredictAll() {
           oldpeak: Number(form.oldpeak || 1),
           slope: Number(form.slope || 1),
           ca: Number(form.ca || 0),
-          thal: Number(form.thal || 2)
+          thal: Number(form.thal || 2),
         },
 
         diabetes: {
@@ -56,9 +73,9 @@ function PredictAll() {
           Insulin: Number(form.Insulin || 80),
           BMI: Number(form.bmi || 25),
           DiabetesPedigreeFunction: Number(
-            form.DiabetesPedigreeFunction || 0.5
+            form.DiabetesPedigreeFunction || 0.5,
           ),
-          Age: Number(form.age || 50)
+          Age: Number(form.age || 50),
         },
 
         stroke: {
@@ -71,39 +88,25 @@ function PredictAll() {
           Residence_type: form.Residence_type || "Urban",
           avg_glucose_level: Number(form.glucose || 120),
           bmi: Number(form.bmi || 25),
-          smoking_status: form.smoking_status || "never smoked"
-        }
+          smoking_status: form.smoking_status || "never smoked",
+        },
       };
 
       const res = await API.post("/predict/all", payload);
       setResult(res.data);
     } catch (error) {
       console.error(error);
-      if (error.response && error.response.status === 422) {
+      if (error.response && [400, 422].includes(error.response.status)) {
         setErrorMsg("Please enter valid input data.");
       } else {
-        setErrorMsg("Prediction service is temporarily unavailable. Please try again.");
+        setErrorMsg(
+          "Prediction service is temporarily unavailable. Please try again.",
+        );
       }
     }
 
     setLoading(false);
   };
-
-  const ResultCard = ({ title, icon, data }) => (
-    <div className="result-card">
-      <h2>{icon} {title}</h2>
-      <p>
-        <strong>Risk Score:</strong>{" "}
-        {(data.risk_score * 100).toFixed(0)}%
-      </p>
-      <p>
-        <strong>Risk Level:</strong> {data.risk_level}
-      </p>
-      <p>
-        <strong>Model Confidence:</strong> {data.confidence}
-      </p>
-    </div>
-  );
 
   return (
     <div className="page">
@@ -118,12 +121,7 @@ function PredictAll() {
           <h3>Basic Inputs</h3>
 
           <label>Age</label>
-          <input
-            type="number"
-            name="age"
-            required
-            onChange={change}
-          />
+          <input type="number" name="age" required onChange={change} />
 
           <label>Gender</label>
           <select name="sex" onChange={change}>
@@ -132,28 +130,13 @@ function PredictAll() {
           </select>
 
           <label>Blood Pressure</label>
-          <input
-            type="number"
-            name="trestbps"
-            required
-            onChange={change}
-          />
+          <input type="number" name="trestbps" required onChange={change} />
 
           <label>Cholesterol</label>
-          <input
-            type="number"
-            name="chol"
-            required
-            onChange={change}
-          />
+          <input type="number" name="chol" required onChange={change} />
 
           <label>Glucose Level</label>
-          <input
-            type="number"
-            name="glucose"
-            required
-            onChange={change}
-          />
+          <input type="number" name="glucose" required onChange={change} />
 
           <label>BMI</label>
           <input
@@ -204,25 +187,13 @@ function PredictAll() {
               </select>
 
               <label>Pregnancies</label>
-              <input
-                type="number"
-                name="Pregnancies"
-                onChange={change}
-              />
+              <input type="number" name="Pregnancies" onChange={change} />
 
               <label>Insulin</label>
-              <input
-                type="number"
-                name="Insulin"
-                onChange={change}
-              />
+              <input type="number" name="Insulin" onChange={change} />
 
               <label>Maximum Heart Rate</label>
-              <input
-                type="number"
-                name="thalach"
-                onChange={change}
-              />
+              <input type="number" name="thalach" onChange={change} />
             </>
           )}
 
@@ -232,7 +203,7 @@ function PredictAll() {
         </form>
 
         {errorMsg && (
-          <div className="error-message" style={{marginTop: "20px"}}>
+          <div className="error-message" style={{ marginTop: "20px" }}>
             {errorMsg}
           </div>
         )}
@@ -240,29 +211,18 @@ function PredictAll() {
         {result && !loading && !errorMsg && (
           <>
             <div className="dashboard-grid">
-              <ResultCard
-                title="Heart Disease"
-                icon="❤️"
-                data={result.heart}
-              />
+              <ResultCard title="Heart Disease" icon="❤️" data={result.heart} />
 
-              <ResultCard
-                title="Diabetes"
-                icon="🩸"
-                data={result.diabetes}
-              />
+              <ResultCard title="Diabetes" icon="🩸" data={result.diabetes} />
 
-              <ResultCard
-                title="Stroke"
-                icon="🧠"
-                data={result.stroke}
-              />
+              <ResultCard title="Stroke" icon="🧠" data={result.stroke} />
             </div>
 
             <div className="confidence-box">
               <p>
-                <strong>Prediction Confidence:</strong>{" "}
-                {result.confidence}
+                <strong>
+                  Confidence is reported separately for each disease.
+                </strong>
               </p>
             </div>
           </>

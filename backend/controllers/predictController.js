@@ -19,7 +19,6 @@ exports.predictHeart = async (req, res, next) => {
 
     const response = await axios.post(`${ML_API}/predict/heart`, req.body);
     res.json(response.data);
-
   } catch (error) {
     next(error);
   }
@@ -31,7 +30,6 @@ exports.predictDiabetes = async (req, res, next) => {
 
     const response = await axios.post(`${ML_API}/predict/diabetes`, req.body);
     res.json(response.data);
-
   } catch (error) {
     next(error);
   }
@@ -43,7 +41,6 @@ exports.predictStroke = async (req, res, next) => {
 
     const response = await axios.post(`${ML_API}/predict/stroke`, req.body);
     res.json(response.data);
-
   } catch (error) {
     next(error);
   }
@@ -53,7 +50,6 @@ exports.predictAll = async (req, res, next) => {
   try {
     const response = await axios.post(`${ML_API}/predict/all`, req.body);
     res.json(response.data);
-
   } catch (error) {
     next(error);
   }
@@ -61,7 +57,10 @@ exports.predictAll = async (req, res, next) => {
 
 exports.predictResearchAll = async (req, res, next) => {
   try {
-    const response = await axios.post(`${ML_API}/predict/research/all`, req.body);
+    const response = await axios.post(
+      `${ML_API}/predict/research/all`,
+      req.body,
+    );
     res.json(response.data);
   } catch (error) {
     next(error);
@@ -71,6 +70,26 @@ exports.predictResearchAll = async (req, res, next) => {
 exports.getResearchMetrics = async (req, res, next) => {
   try {
     const response = await axios.get(`${ML_API}/research/metrics`);
+    res.json(response.data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.simulateRisk = async (req, res, next) => {
+  try {
+    const { disease } = req.params;
+    const supportedDiseases = ["heart", "diabetes", "stroke"];
+    if (!supportedDiseases.includes(disease)) {
+      const error = new Error("Unsupported disease");
+      error.status = 400;
+      throw error;
+    }
+
+    const response = await axios.post(
+      `${ML_API}/simulate/${disease}`,
+      req.body,
+    );
     res.json(response.data);
   } catch (error) {
     next(error);

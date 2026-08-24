@@ -4,6 +4,11 @@ import joblib
 import torch
 import json
 import os
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, average_precision_score, brier_score_loss
 
 import sys
@@ -14,48 +19,48 @@ from inference.mtl_model import get_mtl_model
 
 def evaluate_baselines():
     metrics = {}
-    
-    # Heart
+    datasets = {}
+
     heart_df = pd.read_csv('data/heart.csv')
-    heart_df = heart_df.replace('?', np.nan).apply(pd.to_numeric, errors='coerce').fillna(0)
+    heart_df = heart_df.replace('?', np.nan).apply(pd.to_numeric, errors='coerce').dropna()
     h_features = ["age", "sex", "cp", "trestbps", "chol", "fbs", "restecg", "thalach", "exang", "oldpeak", "slope", "ca", "thal"]
-    h_X = heart_df[h_features]
-    h_y = (heart_df['target'] > 0).astype(int).values
-    
-    h_scaler = joblib.load('models/heart_scaler.pkl')
-    h_X_scaled = h_scaler.transform(h_X)
-    
-    h_model = joblib.load('models/heart_best.pkl')
-    h_probs = h_model.predict_proba(h_X_scaled)[:, 1]
-    h_preds = h_model.predict(h_X_scaled)
-    
-    metrics['Heart (Baseline)'] = get_metrics(h_y, h_preds, h_probs)
-    
-    # Diabetes
+    datasets["Heart"] = (heart_df[h_features], (heart_df['target'] > 0).astype(int))
+
     diabetes_df = pd.read_csv('data/diabetes.csv')
-    diabetes_df = diabetes_df.replace('?', np.nan).apply(pd.to_numeric, errors='coerce').fillna(0)
+    diabetes_df = diabetes_df.replace('?', np.nan).apply(pd.to_numeric, errors='coerce').dropna()
     d_features = ["Pregnancies", "Glucose", "BloodPressure", "SkinThickness", "Insulin", "BMI", "DiabetesPedigreeFunction", "Age"]
-    d_X = diabetes_df[d_features]
-    d_y = diabetes_df['Outcome'].values
-    
-    d_scaler = joblib.load('models/diabetes_scaler.pkl')
-    d_X_scaled = d_scaler.transform(d_X)
-    
-    d_model = joblib.load('models/diabetes_best.pkl')
-    d_probs = d_model.predict_proba(d_X_scaled)[:, 1]
-    d_preds = d_model.predict(d_X_scaled)
-    
-    metrics['Diabetes (Baseline)'] = get_metrics(d_y, d_preds, d_probs)
-    
-    # Stroke
-    stroke_df = pd.read_csv('data/stroke.csv')
-    s_scaler = joblib.load('models/stroke_scaler.pkl')
-    s_model = joblib.load('models/stroke_best.pkl')
-    
-    # Needs to match encoded training structure
-    # For baseline evaluation, we just load the dataset, drop NaNs or encode to mimic the training data.
-    # To keep it simple, we skip precise baseline eval for stroke if encoding is too complex, but let's try.
-    # We can use the already implemented metrics if available, or just mock baseline stroke as we know it's XGBoost.
+    datasets["Diabetes"] = (diabetes_df[d_features], diabetes_df['Outcome'].astype(int))
+
+    stroke_df = pd.read_csv('data/stroke.csv').drop(columns=['id'])
+    stroke_df['bmi'] = pd.to_numeric(stroke_df['bmi'], errors='coerce')
+    stroke_df['bmi'] = stroke_df['bmi'].fillna(stroke_df['bmi'].mean())
+    s_X, s_y = map_stroke_data(stroke_df)
+    datasets["Stroke"] = (s_X, s_y.astype(int))
+
+    for disease, (X, y) in datasets.items():
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=42, stratify=y
+        )
+        scaler = StandardScaler()
+        X_train = scaler.fit_transform(X_train)
+        X_test = scaler.transform(X_test)
+        positive_count = max(int((y_train == 1).sum()), 1)
+        negative_count = max(int((y_train == 0).sum()), 1)
+        models = {
+            "Logistic Regression": LogisticRegression(max_iter=1000, class_weight='balanced', random_state=42),
+            "Random Forest": RandomForestClassifier(class_weight='balanced', n_estimators=300, random_state=42),
+            "XGBoost": XGBClassifier(
+                scale_pos_weight=negative_count / positive_count,
+                random_state=42,
+                eval_metric='logloss'
+            )
+        }
+        for model_name, model in models.items():
+            model.fit(X_train, y_train)
+            probabilities = model.predict_proba(X_test)[:, 1]
+            metrics[f"{disease} ({model_name})"] = get_metrics(
+                y_test, probabilities >= 0.5, probabilities
+            )
     
     return metrics
 
