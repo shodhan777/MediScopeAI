@@ -59,7 +59,7 @@ function HeartSimulator({ result, initialData }) {
 
   return (
     <div className="simulator-container">
-      <h2>🔥 Core Innovation: Real-Time Risk Evolution & Patient Simulation</h2>
+      <h2>Real-Time Patient Risk Simulation</h2>
       <p className="sim-intro">
         Explore clinical prognostic projections and adjust vital signs in real
         time to evaluate therapeutic impacts.
@@ -69,7 +69,7 @@ function HeartSimulator({ result, initialData }) {
       <div className="scenarios-grid">
         <div className="scenario-card untreated">
           <div className="scenario-header">
-            <h4>⚠️ Untreated / Worsening Trajectory</h4>
+            <h4>Untreated / Worsening Trajectory</h4>
             <span className={`badge ${getColor(untreated.risk_level)}`}>
               {untreated.risk_level} Risk
             </span>
@@ -89,7 +89,7 @@ function HeartSimulator({ result, initialData }) {
 
         <div className="scenario-card treated">
           <div className="scenario-header">
-            <h4>🌿 Optimal Treatment & Lifestyle Intervention</h4>
+            <h4>Optimal Treatment & Lifestyle Intervention</h4>
             <span className={`badge ${getColor(treated.risk_level)}`}>
               {treated.risk_level} Risk
             </span>
@@ -110,7 +110,7 @@ function HeartSimulator({ result, initialData }) {
 
       {/* Live Interactive Sandbox */}
       <div className="sandbox-section">
-        <h3>⚡ Real-Time Interactive Risk Sandbox</h3>
+        <h3>Interactive Parameter Adjustments</h3>
         <p className="sandbox-subtitle">
           Adjust the patient's simulated parameters below using the interactive
           sliders to observe immediate dynamic shifts in cardiovascular risk:

@@ -76,17 +76,19 @@ function HeartForm() {
   return (
     <div className="page">
       <div className="form-card">
-        <h1>❤️ Heart Disease Prediction</h1>
+        <h1>Cardiovascular Risk Assessment</h1>
         <p className="subtitle">
-          Enter essential details first. Add advanced values for higher confidence.
+          Please provide patient vitals and clinical history for cardiovascular risk assessment.
         </p>
 
         <form className="smart-form" onSubmit={submit}>
           {/* Essential Fields */}
 
-          <h3>Basic Information</h3>
+          <h3>Patient Demographics and Vitals</h3>
 
-          <label>Age (20 - 100)</label>
+          <div className="label-row">
+            <label><strong>Age</strong> (Years)</label>
+          </div>
           <input
             type="number"
             name="age"
@@ -96,13 +98,17 @@ function HeartForm() {
             onChange={change}
           />
 
-          <label>Gender</label>
+          <div className="label-row">
+            <label><strong>Gender</strong> </label>
+          </div>
           <select name="sex" onChange={change}>
             <option value="1">Male</option>
             <option value="0">Female</option>
           </select>
 
-          <label>Chest Pain Type</label>
+          <div className="label-row">
+            <label><strong>Chest Pain</strong> (Angina Characteristics)</label>
+          </div>
           <select name="cp" onChange={change}>
             <option value="0">Typical Angina</option>
             <option value="1">Atypical Angina</option>
@@ -110,7 +116,10 @@ function HeartForm() {
             <option value="3">Asymptomatic</option>
           </select>
 
-          <label>Resting Blood Pressure (90 - 200)</label>
+          <div className="label-row">
+            <label><strong>Resting Blood Pressure</strong> (Systolic, mmHg)</label>
+            <span className="normal-range">Normal: 90 - 120</span>
+          </div>
           <input
             type="number"
             name="trestbps"
@@ -120,7 +129,10 @@ function HeartForm() {
             onChange={change}
           />
 
-          <label>Cholesterol (100 - 600)</label>
+          <div className="label-row">
+            <label><strong>Cholesterol</strong> (Serum, mg/dL)</label>
+            <span className="normal-range">Normal: &lt; 200</span>
+          </div>
           <input
             type="number"
             name="chol"
@@ -137,29 +149,36 @@ function HeartForm() {
             className="secondary-btn"
             onClick={() => setShowMore(!showMore)}
           >
-            {showMore ? "Hide Advanced Fields" : "Add More Details"}
+            {showMore ? "Hide Clinical Indicators" : "Enter Clinical Indicators"}
           </button>
 
           {/* Advanced Fields */}
 
           {showMore && (
             <>
-              <h3>Advanced Cardiology Inputs</h3>
+              <h3>Clinical Indicators and Test Results</h3>
 
-              <label>Fasting Blood Sugar `{'>'}` 120 mg/dl</label>
+              <div className="label-row">
+                <label><strong>Fasting Blood Sugar</strong> (&gt; 120 mg/dL)</label>
+                <span className="normal-range">Normal: &lt; 100</span>
+              </div>
               <select name="fbs" onChange={change}>
                 <option value="0">No</option>
                 <option value="1">Yes</option>
               </select>
 
-              <label>Resting ECG</label>
+              <div className="label-row">
+                <label><strong>Resting ECG</strong> (Electrocardiogram)</label>
+              </div>
               <select name="restecg" onChange={change}>
                 <option value="0">Normal</option>
                 <option value="1">ST-T abnormality</option>
                 <option value="2">Left ventricular hypertrophy</option>
               </select>
 
-              <label>Maximum Heart Rate (70 - 220)</label>
+              <div className="label-row">
+                <label><strong>Max Heart Rate</strong> (Achieved, bpm)</label>
+              </div>
               <input
                 type="number"
                 name="thalach"
@@ -168,13 +187,17 @@ function HeartForm() {
                 onChange={change}
               />
 
-              <label>Exercise Induced Angina</label>
+              <div className="label-row">
+                <label><strong>Exercise-Induced Angina</strong> (Angina Pectoris)</label>
+              </div>
               <select name="exang" onChange={change}>
                 <option value="0">No</option>
                 <option value="1">Yes</option>
               </select>
 
-              <label>Old Peak (0 - 6)</label>
+              <div className="label-row">
+                <label><strong>ST Depression</strong> (Oldpeak)</label>
+              </div>
               <input
                 type="number"
                 step="0.1"
@@ -184,14 +207,18 @@ function HeartForm() {
                 onChange={change}
               />
 
-              <label>Slope</label>
+              <div className="label-row">
+                <label><strong>ST Segment Slope</strong> (Peak Exercise)</label>
+              </div>
               <select name="slope" onChange={change}>
                 <option value="0">Upsloping</option>
                 <option value="1">Flat</option>
                 <option value="2">Downsloping</option>
               </select>
 
-              <label>Major Vessels (0 - 3)</label>
+              <div className="label-row">
+                <label><strong>Major Vessels</strong> (Fluoroscopy, 0-3)</label>
+              </div>
               <select name="ca" onChange={change}>
                 <option value="0">0</option>
                 <option value="1">1</option>
@@ -199,7 +226,9 @@ function HeartForm() {
                 <option value="3">3</option>
               </select>
 
-              <label>Thalassemia</label>
+              <div className="label-row">
+                <label><strong>Thalassemia</strong> (Hemoglobin Disorder)</label>
+              </div>
               <select name="thal" onChange={change}>
                 <option value="1">Normal</option>
                 <option value="2">Fixed Defect</option>

@@ -24,7 +24,7 @@ function DiseaseXAI({ result }) {
       {result.smart_alert && (
         <div className={`smart-alert-box ${getAlertStyle()}`}>
           <div className="alert-content">
-            <h4>Clinical Decision Support Alert</h4>
+            <h4>Clinical Decision Support</h4>
             <p>{result.smart_alert}</p>
           </div>
         </div>
@@ -33,9 +33,9 @@ function DiseaseXAI({ result }) {
       {/* Phase 6: Explainable AI (XAI) */}
       {result.xai_insights && result.xai_insights.length > 0 && (
         <div className="xai-section">
-          <h3>🧠 Explainable AI (XAI) — Key Risk Contributing Factors</h3>
+          <h3>Key Risk Contributing Factors</h3>
           <p className="xai-subtitle">
-            Transparent breakdown of physiological features influencing this prediction model:
+            Breakdown of physiological features influencing the prediction:
           </p>
           <div className="xai-grid">
             {result.xai_insights.map((item, idx) => (
@@ -57,11 +57,11 @@ function DiseaseXAI({ result }) {
       {/* Clinical Decision Support & Recommendations */}
       {result.recommendations && result.recommendations.length > 0 && (
         <div className="cds-recommendations">
-          <h3>📋 Clinical Decision Support — Action Plan & Recommendations</h3>
+          <h3>Clinical Action Plan & Recommendations</h3>
           <ul className="recommendations-list">
             {result.recommendations.map((rec, index) => (
               <li key={index}>
-                <span className="rec-icon">✔</span>
+                <span className="rec-icon">•</span>
                 <span>{rec}</span>
               </li>
             ))}
